@@ -6,6 +6,7 @@ import Dashboard from '@/views/Dashboard.vue'
 import Onboarding from '@/views/Onboarding.vue'
 import Reframing from '@/views/Reframing.vue'
 import InterestForm from '@/views/InterestForm.vue'
+import OnboardingRecommendation from '@/views/OnboardingRecommendation.vue'
 import Recommendation from '@/views/Recommendation.vue'
 import CourseDetail from '@/views/CourseDetail.vue'
 import Learning from '@/views/Learning.vue'
@@ -41,6 +42,11 @@ const routes = [
     path: '/interest-form',
     name: 'interest-form',
     component: InterestForm,
+  },
+  {
+    path: '/onboarding-recommendation',
+    name: 'onboarding-recommendation',
+    component: OnboardingRecommendation,
   },
   {
     path: '/recommendation',

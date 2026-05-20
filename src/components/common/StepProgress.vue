@@ -1,35 +1,55 @@
 <template>
-  <div class="flex items-center justify-center gap-3">
-    <div
-      v-for="step in total"
-      :key="step"
-      class="flex items-center gap-3"
-    >
-      <div
-        class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold"
-        :class="step <= current ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'"
+  <nav class="mx-auto w-full max-w-5xl overflow-x-auto rounded-full bg-white/60 px-3 py-2 shadow-sm ring-1 ring-slate-200/70 backdrop-blur" aria-label="Progress onboarding">
+    <ol class="flex min-w-[560px] items-center">
+      <li
+        v-for="(label, index) in stepLabels"
+        :key="label"
+        class="flex flex-1 items-center"
       >
-        {{ step }}
-      </div>
+        <div class="flex shrink-0 items-center gap-3">
+          <span
+            class="grid h-8 w-8 place-items-center rounded-full text-xs font-bold transition"
+            :class="
+              index + 1 === current
+                ? 'bg-gradient-to-br from-blue-500 to-violet-600 text-white shadow-sm'
+                : index + 1 < current
+                  ? 'bg-blue-50 text-blue-600'
+                  : 'bg-transparent text-slate-500'
+            "
+          >
+            {{ index + 1 }}
+          </span>
+          <span
+            class="whitespace-nowrap text-sm font-bold"
+            :class="index + 1 === current ? 'text-[#5d6ff3]' : 'text-slate-600'"
+          >
+            {{ label }}
+          </span>
+        </div>
 
-      <div
-        v-if="step < total"
-        class="h-1 w-12 rounded-full"
-        :class="step < current ? 'bg-blue-600' : 'bg-slate-200'"
-      />
-    </div>
-  </div>
+        <span
+          v-if="index < stepLabels.length - 1"
+          class="mx-6 h-px flex-1 rounded-full"
+          :class="index + 1 < current ? 'bg-blue-300' : 'bg-slate-200'"
+        />
+      </li>
+    </ol>
+  </nav>
 </template>
 
 <script setup>
-defineProps({
+import { computed } from 'vue'
+
+const props = defineProps({
   current: {
     type: Number,
     required: true,
   },
-  total: {
-    type: Number,
-    default: 4,
+  labels: {
+    type: Array,
+    default: () => ['IT Familiarity', 'Reframing', 'Minat', 'Rekomendasi'],
   },
 })
+
+const stepLabels = computed(() => props.labels)
 </script>
