@@ -31,7 +31,23 @@
         </BaseCard>
       </div>
 
-      <AdminResourceTable :resources="adminResources" @add="showForm = true" />
+      <div class="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div class="relative max-w-sm flex-1">
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Cari resource berdasarkan judul..."
+            class="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+          />
+        </div>
+      </div>
+
+      <AdminResourceTable 
+        :resources="filteredResources" 
+        @add="openForm()" 
+        @edit="openForm($event)"
+        @delete="handleDelete"
+      />
     </section>
 
     <div
@@ -41,10 +57,10 @@
       <BaseCard padding="lg" class="max-h-[90vh] w-full max-w-3xl overflow-y-auto">
         <div class="mb-6 flex items-start justify-between gap-4">
           <div>
-            <p class="text-sm font-semibold uppercase tracking-wide text-blue-600">Form Statis</p>
-            <h2 class="mt-2 text-2xl font-semibold text-slate-950">Tambah Resource</h2>
+            <p class="text-sm font-semibold uppercase tracking-wide text-blue-600">Database</p>
+            <h2 class="mt-2 text-2xl font-semibold text-slate-950">{{ isEditing ? 'Edit Resource' : 'Tambah Resource' }}</h2>
             <p class="mt-2 text-sm leading-6 text-slate-500">
-              Form ini hanya UI dummy, belum terhubung ke backend.
+              Perubahan akan disimpan langsung ke database PostgreSQL melalui Backend API.
             </p>
           </div>
           <button
@@ -56,25 +72,25 @@
           </button>
         </div>
 
-        <form class="grid gap-5 md:grid-cols-2" @submit.prevent="showForm = false">
+        <form class="grid gap-5 md:grid-cols-2" @submit.prevent="handleSubmit">
           <div>
             <label class="mb-2 block text-sm font-medium text-slate-800" for="title">Title</label>
-            <input id="title" :class="inputClass" placeholder="Contoh: HTML & CSS Dasar" />
+            <input id="title" v-model="formData.title" required :class="inputClass" placeholder="Contoh: HTML & CSS Dasar" />
           </div>
 
           <div>
             <label class="mb-2 block text-sm font-medium text-slate-800" for="url">External URL</label>
-            <input id="url" :class="inputClass" placeholder="https://youtube.com/..." />
+            <input id="url" v-model="formData.externalUrl" :class="inputClass" placeholder="https://youtube.com/..." />
           </div>
 
           <div class="md:col-span-2">
             <label class="mb-2 block text-sm font-medium text-slate-800" for="description">Description</label>
-            <textarea id="description" rows="3" :class="textareaClass" placeholder="Deskripsi singkat resource" />
+            <textarea id="description" v-model="formData.description" rows="3" :class="textareaClass" placeholder="Deskripsi singkat resource" />
           </div>
 
           <div>
             <label class="mb-2 block text-sm font-medium text-slate-800" for="category">Category</label>
-            <select id="category" :class="inputClass">
+            <select id="category" v-model="formData.category" :class="inputClass">
               <option>Frontend</option>
               <option>Backend</option>
               <option>Data</option>
@@ -85,7 +101,7 @@
 
           <div>
             <label class="mb-2 block text-sm font-medium text-slate-800" for="level">Level</label>
-            <select id="level" :class="inputClass">
+            <select id="level" v-model="formData.level" :class="inputClass">
               <option>Pemula</option>
               <option>Menengah</option>
               <option>Lanjutan</option>
@@ -94,22 +110,22 @@
 
           <div>
             <label class="mb-2 block text-sm font-medium text-slate-800" for="duration">Duration</label>
-            <input id="duration" :class="inputClass" placeholder="45 menit" />
+            <input id="duration" v-model="formData.duration" :class="inputClass" placeholder="45 menit" />
           </div>
 
           <div>
             <label class="mb-2 block text-sm font-medium text-slate-800" for="tags">Tags</label>
-            <input id="tags" :class="inputClass" placeholder="HTML, CSS, Pemula" />
+            <input id="tags" v-model="formData.tags" :class="inputClass" placeholder="HTML, CSS, Pemula" />
           </div>
 
           <div class="md:col-span-2">
             <label class="mb-2 block text-sm font-medium text-slate-800" for="summary">AI Summary</label>
-            <textarea id="summary" rows="3" :class="textareaClass" placeholder="Ringkasan AI singkat" />
+            <textarea id="summary" v-model="formData.summary" rows="3" :class="textareaClass" placeholder="Ringkasan AI singkat" />
           </div>
 
           <div class="md:col-span-2">
             <label class="mb-2 block text-sm font-medium text-slate-800" for="points">Learning Points</label>
-            <textarea id="points" rows="3" :class="textareaClass" placeholder="Poin belajar, pisahkan dengan koma atau baris baru" />
+            <textarea id="points" v-model="formData.points" rows="3" :class="textareaClass" placeholder="Poin belajar, pisahkan dengan koma atau baris baru" />
           </div>
 
           <div class="flex flex-col gap-3 md:col-span-2 sm:flex-row sm:justify-end">
@@ -117,7 +133,7 @@
               Batal
             </BaseButton>
             <BaseButton type="submit">
-              Simpan Dummy
+              {{ isEditing ? 'Simpan Perubahan' : 'Simpan Resource' }}
             </BaseButton>
           </div>
         </form>
@@ -127,30 +143,127 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import AdminResourceTable from '@/components/admin/AdminResourceTable.vue'
 import AdminTopNavbar from '@/components/admin/AdminTopNavbar.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
 import BaseCard from '@/components/common/BaseCard.vue'
-import { resources } from '@/data/resources'
+import { useResourceStore } from '@/stores/resourceStore'
 import { BarChart3, Layers, MousePointerClick } from 'lucide-vue-next'
 
+const resourceStore = useResourceStore()
+
 const showForm = ref(false)
+const isEditing = ref(false)
+const searchQuery = ref('')
+const formData = ref({
+  id: null,
+  title: '',
+  externalUrl: '',
+  description: '',
+  category: 'Frontend',
+  level: 'Pemula',
+  duration: '',
+  tags: '',
+  summary: '',
+  points: ''
+})
+
 const inputClass =
   'h-12 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100'
 const textareaClass =
   'w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100'
 
-const normalizeSource = (source) => source.split(' - ')[0]
+const normalizeSource = (source) => {
+  if (!source) return ''
+  return source.split(' - ')[0]
+}
 
-const adminResources = resources.map((resource) => ({
-  ...resource,
-  source: normalizeSource(resource.source),
-}))
+const adminResources = computed(() => {
+  const resources = resourceStore.resources || []
+  return resources.map((resource) => ({
+    ...resource,
+    source: normalizeSource(resource.source),
+  }))
+})
 
-const stats = [
-  { title: 'Total Resource', value: adminResources.length, icon: Layers },
+const filteredResources = computed(() => {
+  if (!searchQuery.value) return adminResources.value
+  const query = searchQuery.value.toLowerCase()
+  return adminResources.value.filter(r => r.title?.toLowerCase().includes(query))
+})
+
+const popularCategory = computed(() => {
+  if (!adminResources.value.length) return 'Belum ada'
+  const counts = adminResources.value.reduce((acc, curr) => {
+    acc[curr.category] = (acc[curr.category] || 0) + 1
+    return acc
+  }, {})
+  return Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b)
+})
+
+const stats = computed(() => [
+  { title: 'Total Resource', value: adminResources.value.length, icon: Layers },
   { title: 'Total Klik Rekomendasi', value: '1,284', icon: MousePointerClick },
-  { title: 'Kategori Terpopuler', value: 'Frontend', icon: BarChart3 },
-]
+  { title: 'Kategori Terpopuler', value: popularCategory.value, icon: BarChart3 },
+])
+
+const openForm = (resource = null) => {
+  if (resource) {
+    isEditing.value = true
+    formData.value = { 
+      ...resource,
+      tags: resource.tags?.join(', ') || '',
+      points: resource.learningPoints?.join('\n') || ''
+    }
+  } else {
+    isEditing.value = false
+    formData.value = {
+      id: null,
+      title: '',
+      externalUrl: '',
+      description: '',
+      category: 'Frontend',
+      level: 'Pemula',
+      duration: '',
+      tags: '',
+      summary: '',
+      points: ''
+    }
+  }
+  showForm.value = true
+}
+
+const handleSubmit = async () => {
+  const submissionData = {
+    ...formData.value,
+    tags: formData.value.tags ? formData.value.tags.split(',').map(s => s.trim()).filter(Boolean) : [],
+    learningPoints: formData.value.points ? formData.value.points.split('\n').map(s => s.trim()).filter(Boolean) : []
+  }
+  
+  try {
+    if (isEditing.value && formData.value.id) {
+      await resourceStore.updateResource(formData.value.id, submissionData)
+    } else {
+      await resourceStore.addResource(submissionData)
+    }
+    showForm.value = false
+  } catch (error) {
+    alert('Gagal menyimpan data: ' + error.message)
+  }
+}
+
+const handleDelete = async (id) => {
+  if (confirm('Apakah Anda yakin ingin menghapus resource ini secara permanen dari database?')) {
+    try {
+      await resourceStore.deleteResource(id)
+    } catch (error) {
+      alert('Gagal menghapus data: ' + error.message)
+    }
+  }
+}
+
+onMounted(() => {
+  resourceStore.fetchResources()
+})
 </script>

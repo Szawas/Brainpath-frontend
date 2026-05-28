@@ -23,13 +23,22 @@
         </RouterLink>
       </nav>
 
-      <RouterLink
-        v-if="ctaLabel"
-        :to="ctaTo"
-        class="hidden h-10 items-center rounded-xl bg-blue-600 px-5 text-sm font-black text-white shadow-sm transition hover:bg-blue-700 sm:inline-flex"
-      >
-        {{ ctaLabel }}
-      </RouterLink>
+      <div class="hidden items-center gap-3 sm:flex">
+        <RouterLink
+          v-if="secondaryCtaLabel"
+          :to="secondaryCtaTo"
+          class="h-10 inline-flex items-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
+        >
+          {{ secondaryCtaLabel }}
+        </RouterLink>
+        <RouterLink
+          v-if="ctaLabel"
+          :to="ctaTo"
+          class="h-10 inline-flex items-center rounded-xl bg-blue-600 px-5 text-sm font-black text-white shadow-sm transition hover:bg-blue-700"
+        >
+          {{ ctaLabel }}
+        </RouterLink>
+      </div>
     </div>
   </header>
 </template>
@@ -58,11 +67,19 @@ defineProps({
   },
   ctaLabel: {
     type: String,
-    default: 'Login',
+    default: 'Masuk',
   },
   ctaTo: {
     type: [String, Object],
     default: '/login',
+  },
+  secondaryCtaLabel: {
+    type: String,
+    default: 'Daftar',
+  },
+  secondaryCtaTo: {
+    type: [String, Object],
+    default: '/register',
   },
 })
 </script>

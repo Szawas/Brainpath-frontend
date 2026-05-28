@@ -16,26 +16,26 @@
           <BaseCard padding="lg" class="rounded-3xl">
             <div class="flex items-center gap-4">
               <span class="grid h-14 w-14 place-items-center rounded-full bg-blue-600 text-lg font-semibold text-white">
-                U
+                {{ authStore.user?.name ? authStore.user.name[0].toUpperCase() : 'U' }}
               </span>
               <div>
-                <h2 class="text-lg font-semibold text-slate-950">User Brainpath</h2>
-                <p class="mt-1 text-sm text-slate-500">user@brainpath.dev</p>
+                <h2 class="text-lg font-semibold text-slate-950">{{ authStore.user?.name || 'User Brainpath' }}</h2>
+                <p class="mt-1 text-sm text-slate-500">{{ authStore.user?.email || 'user@brainpath.dev' }}</p>
               </div>
             </div>
 
             <div class="mt-6 space-y-3 text-sm">
               <div class="flex justify-between rounded-2xl bg-slate-50 px-4 py-3">
-                <span class="text-slate-500">Level</span>
-                <span class="font-medium text-slate-900">Pemula</span>
+                <span class="text-slate-500">Pemahaman IT Awal</span>
+                <span class="font-medium text-slate-900">{{ authStore.user?.hasItKnowledge ? 'Sudah Paham' : 'Baru Belajar' }}</span>
               </div>
               <div class="flex justify-between rounded-2xl bg-slate-50 px-4 py-3">
                 <span class="text-slate-500">Minat terakhir</span>
-                <span class="font-medium text-slate-900">Frontend</span>
+                <span class="font-medium text-slate-900">{{ authStore.user?.interest || 'Belum diatur' }}</span>
               </div>
               <div class="flex justify-between rounded-2xl bg-slate-50 px-4 py-3">
                 <span class="text-slate-500">Total rekomendasi</span>
-                <span class="font-medium text-slate-900">6 resource</span>
+                <span class="font-medium text-slate-900">{{ recommendationStore.recommendations?.length || 0 }} resource</span>
               </div>
             </div>
           </BaseCard>
@@ -43,7 +43,7 @@
           <BaseCard padding="lg" class="rounded-3xl">
             <h2 class="text-lg font-semibold text-slate-950">Preferensi Belajar</h2>
             <p class="mt-2 text-sm leading-6 text-slate-500">
-              Data dummy ini akan diganti dari hasil onboarding dan kuis minat saat backend sudah tersedia.
+              Berikut adalah ringkasan hasil onboarding kamu.
             </p>
 
             <div class="mt-5 grid gap-3 sm:grid-cols-2">
@@ -64,13 +64,19 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import BaseCard from '@/components/common/BaseCard.vue'
+import { useAuthStore } from '@/stores/authStore'
+import { useRecommendationStore } from '@/stores/recommendationStore'
 
-const preferences = [
-  { label: 'Tujuan', value: 'Membangun project pribadi' },
-  { label: 'Cara belajar', value: 'Praktik langsung' },
-  { label: 'Kategori rekomendasi', value: 'Frontend Development' },
-  { label: 'Resource favorit', value: 'Video YouTube' },
-]
+const authStore = useAuthStore()
+const recommendationStore = useRecommendationStore()
+
+const preferences = computed(() => [
+  { label: 'Tujuan', value: authStore.user?.learningGoal || 'Belum diatur' },
+  { label: 'Pengetahuan IT', value: authStore.user?.hasItKnowledge ? 'Sudah Tahu' : 'Belum Tahu' },
+  { label: 'Kategori rekomendasi', value: authStore.user?.interest || 'Belum diatur' },
+  { label: 'Catatan tambahan', value: authStore.user?.note || 'Tidak ada catatan' },
+])
 </script>

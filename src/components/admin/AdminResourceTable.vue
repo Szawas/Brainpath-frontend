@@ -63,6 +63,7 @@
                   type="button"
                   class="text-slate-900 transition hover:text-blue-700"
                   aria-label="Edit resource"
+                  @click="$emit('edit', resource)"
                 >
                   <Pencil class="h-4 w-4" />
                 </button>
@@ -70,6 +71,7 @@
                   type="button"
                   class="text-red-500 transition hover:text-red-600"
                   aria-label="Hapus resource"
+                  @click="$emit('delete', resource.id)"
                 >
                   <Trash2 class="h-4 w-4" />
                 </button>
@@ -86,7 +88,7 @@
 import BaseCard from '@/components/common/BaseCard.vue'
 import { Pencil, Plus, Trash2 } from 'lucide-vue-next'
 
-defineEmits(['add'])
+defineEmits(['add', 'edit', 'delete'])
 
 defineProps({
   resources: {

@@ -7,7 +7,7 @@
         <div class="mb-5 flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p class="text-xs font-black uppercase tracking-wide text-blue-600">Dashboard</p>
-            <h1 class="mt-1 text-2xl font-black tracking-tight text-slate-950">Halo, User!</h1>
+            <h1 class="mt-1 text-2xl font-black tracking-tight text-slate-950">Halo, {{ authStore.user?.name || 'User' }}!</h1>
             <p class="mt-1.5 max-w-2xl text-sm leading-6 text-slate-500">
               Temukan resource belajar IT terbaik berdasarkan minatmu dan mulai onboarding baru saat minat belajarmu berubah.
             </p>
@@ -61,7 +61,7 @@
             <div>
               <h2 class="text-lg font-black text-slate-950">Rekomendasi Terakhir</h2>
               <p class="mt-1 text-sm text-slate-500">
-                Dummy resource untuk tampilan awal sebelum integrasi API.
+                Resource yang direkomendasikan AI untuk Anda.
               </p>
             </div>
             <RouterLink to="/recommendation" class="text-sm font-black text-blue-600 hover:text-violet-600">
@@ -72,26 +72,25 @@
           <div class="grid gap-4 lg:grid-cols-3">
             <BaseCard
               v-for="resource in recentRecommendations"
-              :key="resource.title"
+              :key="resource.id"
               interactive
               padding="sm"
               class="flex min-h-[178px] flex-col rounded-2xl"
             >
               <div class="flex items-start justify-between gap-4">
                 <span
-                  class="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-xs font-black"
-                  :class="resource.accent"
+                  class="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-xs font-black bg-blue-100 text-blue-700"
                 >
-                  {{ resource.initial }}
+                  {{ getInitial(resource.title) }}
                 </span>
                 <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-700">
-                  Match {{ resource.match }}%
+                  {{ resource.category }}
                 </span>
               </div>
-              <h3 class="mt-3 text-base font-black text-slate-950">{{ resource.title }}</h3>
-              <p class="mt-2 flex-1 text-sm leading-6 text-slate-500">{{ resource.description }}</p>
+              <h3 class="mt-3 text-base font-black text-slate-950 line-clamp-1">{{ resource.title }}</h3>
+              <p class="mt-2 flex-1 text-sm leading-6 text-slate-500 line-clamp-2">{{ resource.description }}</p>
               <div class="mt-4 flex items-center justify-between gap-4">
-                <span class="text-xs font-bold text-slate-400">{{ resource.platform }}</span>
+                <span class="text-xs font-bold text-slate-400">{{ resource.level || 'Umum' }}</span>
                 <RouterLink
                   :to="`/resources/${resource.id}`"
                   class="text-sm font-black text-blue-600 hover:text-violet-600"
@@ -100,6 +99,10 @@
                 </RouterLink>
               </div>
             </BaseCard>
+            
+            <div v-if="recentRecommendations.length === 0" class="col-span-3 py-10 text-center text-sm text-slate-500">
+              Belum ada rekomendasi. Silakan isi form minat belajar terlebih dahulu.
+            </div>
           </div>
         </section>
       </div>
@@ -108,58 +111,50 @@
 </template>
 
 <script setup>
+import { computed, onMounted } from 'vue'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import BaseCard from '@/components/common/BaseCard.vue'
 import { ExternalLink, Layers, Sparkles, Tag } from 'lucide-vue-next'
+import { useAuthStore } from '@/stores/authStore'
+import { useRecommendationStore } from '@/stores/recommendationStore'
+import { useResourceStore } from '@/stores/resourceStore'
 
-const summaries = [
+const authStore = useAuthStore()
+const recommendationStore = useRecommendationStore()
+const resourceStore = useResourceStore()
+
+const summaries = computed(() => [
   {
     title: 'Total Rekomendasi',
-    value: '6',
+    value: recommendationStore.recommendations?.length || 0,
     icon: Layers,
     iconClass: 'bg-blue-600',
   },
   {
-    title: 'Kategori Terakhir',
-    value: 'Frontend',
+    title: 'Minat Terakhir',
+    value: authStore.user?.interest ? authStore.user.interest.split(',')[0] : 'Belum Ada',
     icon: Tag,
     iconClass: 'bg-violet-600',
   },
   {
-    title: 'Resource Terakhir Dibuka',
-    value: 'HTML & CSS Dasar',
+    title: 'Riwayat Belajar',
+    value: resourceStore.history?.length || 0,
     icon: ExternalLink,
     iconClass: 'bg-slate-700',
   },
-]
+])
 
-const recentRecommendations = [
-  {
-    id: 1,
-    title: 'Responsive Web Design',
-    platform: 'freeCodeCamp',
-    initial: 'FCC',
-    match: 96,
-    accent: 'bg-blue-100 text-blue-700',
-    description: 'Latihan HTML dan CSS dasar untuk membangun halaman web responsif.',
-  },
-  {
-    id: 2,
-    title: 'Learn Web Development',
-    platform: 'MDN',
-    initial: 'MDN',
-    match: 91,
-    accent: 'bg-violet-100 text-violet-700',
-    description: 'Panduan konsep web fundamental dari dokumentasi Mozilla Developer Network.',
-  },
-  {
-    id: 3,
-    title: 'Frontend Developer Roadmap',
-    platform: 'roadmap.sh',
-    initial: 'MAP',
-    match: 86,
-    accent: 'bg-slate-100 text-slate-700',
-    description: 'Urutan topik belajar frontend agar perjalanan belajar lebih terarah.',
-  },
-]
+const recentRecommendations = computed(() => {
+  return (recommendationStore.recommendations || []).slice(0, 3)
+})
+
+const getInitial = (title) => {
+  if (!title) return 'BP'
+  return title.substring(0, 2).toUpperCase()
+}
+
+onMounted(() => {
+  recommendationStore.fetchRecommendations()
+  resourceStore.fetchHistory()
+})
 </script>

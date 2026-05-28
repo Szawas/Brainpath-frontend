@@ -1,13 +1,22 @@
 <template>
   <main class="min-h-screen bg-slate-50 px-5 py-8 text-slate-950 sm:px-6 lg:py-10">
     <section class="mx-auto max-w-6xl">
-      <nav class="mb-6 flex flex-wrap items-center gap-2 text-sm font-bold text-slate-500">
+      <nav v-if="resource" class="mb-6 flex flex-wrap items-center gap-2 text-sm font-bold text-slate-500">
         <RouterLink to="/dashboard" class="hover:text-blue-700">Dashboard</RouterLink>
         <span>/</span>
         <RouterLink to="/recommendation" class="hover:text-blue-700">Rekomendasi</RouterLink>
         <span>/</span>
         <span class="text-slate-950">{{ resource.title }}</span>
       </nav>
+
+      <div v-if="resourceStore.loading" class="mb-8 flex justify-center py-10">
+        <p class="text-slate-500 font-medium">Memuat detail resource...</p>
+      </div>
+      <div v-else-if="resourceStore.error" class="mb-8 flex justify-center py-10 text-red-500 font-medium">
+        {{ resourceStore.error }}
+      </div>
+      
+      <template v-else-if="resource">
 
       <BaseCard padding="lg" class="mb-6">
         <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
@@ -104,29 +113,44 @@
           </BaseCard>
         </aside>
       </div>
+      </template>
     </section>
   </main>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import BaseButton from '@/components/common/BaseButton.vue'
 import BaseCard from '@/components/common/BaseCard.vue'
 import AISummarySection from '@/components/resource/AISummarySection.vue'
 import VideoPreview from '@/components/resource/VideoPreview.vue'
-import { getResourceById, resources } from '@/data/resources'
+import { useResourceStore } from '@/stores/resourceStore'
 import { ArrowLeft, ExternalLink, Info, ListChecks, Map, Users } from 'lucide-vue-next'
 
 const route = useRoute()
-const resource = computed(() => getResourceById(route.params.id) ?? resources[0])
+const resourceStore = useResourceStore()
 
-const metadata = computed(() => [
-  resource.value.source,
-  resource.value.category,
-  resource.value.level,
-  resource.value.duration,
-])
+const resource = computed(() => resourceStore.currentResource)
 
-const discussedTopics = computed(() => resource.value.learningPoints)
+const metadata = computed(() => {
+  if (!resource.value) return []
+  return [
+    resource.value.source,
+    resource.value.category,
+    resource.value.level,
+    resource.value.duration,
+  ]
+})
+
+const discussedTopics = computed(() => resource.value?.learningPoints || [])
+
+onMounted(async () => {
+  const id = route.params.id
+  if (id) {
+    await resourceStore.fetchResourceById(id)
+    // Track action "preview" atau progress
+    resourceStore.trackProgress(id)
+  }
+})
 </script>

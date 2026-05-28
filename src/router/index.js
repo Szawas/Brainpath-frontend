@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import Landing from '@/views/Landing.vue'
 import Login from '@/views/Login.vue'
+import Register from '@/views/Register.vue'
 import Dashboard from '@/views/Dashboard.vue'
 import Onboarding from '@/views/Onboarding.vue'
 import Reframing from '@/views/Reframing.vue'
@@ -10,10 +11,11 @@ import Recommendation from '@/views/Recommendation.vue'
 import ResourcePreview from '@/views/ResourcePreview.vue'
 import Profile from '@/views/Profile.vue'
 import History from '@/views/History.vue'
+import Chatbot from '@/views/Chatbot.vue'
 import AdminResources from '@/views/AdminResources.vue'
 import AdminAnalytics from '@/views/AdminAnalytics.vue'
 import AdminSettings from '@/views/AdminSettings.vue'
-import { getCurrentUser, isAuthenticated } from '@/lib/auth'
+import { useAuthStore } from '@/stores/authStore'
 
 const routes = [
   {
@@ -25,6 +27,11 @@ const routes = [
     path: '/login',
     name: 'login',
     component: Login,
+  },
+  {
+    path: '/register',
+    name: 'register',
+    component: Register,
   },
   {
     path: '/dashboard',
@@ -99,6 +106,15 @@ const routes = [
     },
   },
   {
+    path: '/chatbot',
+    name: 'chatbot',
+    component: Chatbot,
+    meta: {
+      requiresAuth: true,
+      role: 'user',
+    },
+  },
+  {
     path: '/admin/resources',
     name: 'admin-resources',
     component: AdminResources,
@@ -147,9 +163,9 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
-  const user = getCurrentUser()
+  const authStore = useAuthStore()
 
-  if (to.meta.requiresAuth && !isAuthenticated()) {
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     return {
       path: '/login',
       query: {
@@ -157,9 +173,14 @@ router.beforeEach((to) => {
       },
     }
   }
+  
+  // Jika sudah login dan mencoba ke halaman public (login/register/landing)
+  if (authStore.isAuthenticated && (to.path === '/login' || to.path === '/register' || to.path === '/')) {
+    return authStore.user?.role === 'admin' ? '/admin/resources' : '/dashboard'
+  }
 
-  if (to.meta.role && user?.role !== to.meta.role) {
-    return user?.role === 'admin' ? '/admin/resources' : '/dashboard'
+  if (to.meta.role && authStore.user?.role !== to.meta.role) {
+    return authStore.user?.role === 'admin' ? '/admin/resources' : '/dashboard'
   }
 
   return true

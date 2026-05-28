@@ -41,7 +41,13 @@
         </p>
       </div>
 
-      <div class="grid gap-4 xl:grid-cols-2">
+      <div v-if="recommendationStore.loading" class="mb-8 flex justify-center py-10">
+        <p class="text-slate-500 font-medium">Memuat rekomendasi...</p>
+      </div>
+      <div v-else-if="recommendationStore.error" class="mb-8 flex justify-center py-10 text-red-500 font-medium">
+        {{ recommendationStore.error }}
+      </div>
+      <div v-else class="grid gap-4 xl:grid-cols-2">
         <RecommendationCard
           v-for="resource in sortedResources"
           :key="resource.id"
@@ -53,15 +59,27 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
 import RecommendationCard from '@/components/recommendation/RecommendationCard.vue'
 import RecommendationFilter from '@/components/recommendation/RecommendationFilter.vue'
-import { resources } from '@/data/resources'
+import { useRecommendationStore } from '@/stores/recommendationStore'
 import { Sparkles } from 'lucide-vue-next'
 
-const categories = ['Semua', 'Frontend', 'Backend', 'Data', 'AI', 'General IT']
+const recommendationStore = useRecommendationStore()
+
+const categories = ['Semua', 'Frontend', 'Backend', 'Data', 'AI', 'Cybersecurity']
+
+// Map UI filter labels to actual DB category slugs
+const categorySlugMap = {
+  'Frontend': 'web-development',
+  'Backend': 'web-development',
+  'Data': 'data-science',
+  'AI': 'data-science',
+  'Cybersecurity': 'cybersecurity',
+}
+
 const sortOptions = [
   { label: 'Paling Relevan', value: 'relevance' },
   { label: 'Pemula', value: 'beginner' },
@@ -72,8 +90,11 @@ const activeCategory = ref('Semua')
 const sortBy = ref('relevance')
 
 const filteredResources = computed(() => {
-  if (activeCategory.value === 'Semua') return resources
-  return resources.filter((resource) => resource.category === activeCategory.value)
+  const currentResources = recommendationStore.recommendations || []
+  if (activeCategory.value === 'Semua') return currentResources
+  const slug = categorySlugMap[activeCategory.value]
+  if (!slug) return currentResources
+  return currentResources.filter((resource) => resource.category === slug)
 })
 
 const sortedResources = computed(() => {
@@ -101,4 +122,8 @@ const parseDuration = (duration) => {
 
   return hours * 60 + minutes
 }
+
+onMounted(() => {
+  recommendationStore.fetchRecommendations()
+})
 </script>

@@ -31,16 +31,22 @@
 
       <div class="flex items-center gap-4">
         <RouterLink
-          to="/"
+          to="/dashboard"
           class="hidden text-sm font-medium text-slate-500 transition hover:text-blue-700 sm:inline"
         >
           Kembali ke App
         </RouterLink>
+        <button
+          class="text-sm font-medium text-red-500 transition hover:text-red-700 sm:inline"
+          @click="handleLogout"
+        >
+          Logout
+        </button>
         <span
           class="grid h-10 w-10 place-items-center rounded-full bg-slate-950 text-sm font-semibold text-white shadow-sm"
           aria-label="Admin avatar"
         >
-          A
+          {{ authStore.user?.name?.charAt(0) || 'A' }}
         </span>
       </div>
     </div>
@@ -48,9 +54,17 @@
 </template>
 
 <script setup>
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/authStore'
 
 const route = useRoute()
+const router = useRouter()
+const authStore = useAuthStore()
+
+const handleLogout = async () => {
+  await authStore.logout()
+  router.push('/')
+}
 
 const menu = [
   { label: 'Resources', to: '/admin/resources' },

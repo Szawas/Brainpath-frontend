@@ -23,7 +23,7 @@
 
         <div class="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <RouterLink
-            to="/login"
+            to="/register"
             class="inline-flex h-12 min-w-64 items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-blue-600 to-violet-600 px-8 text-base font-black text-white shadow-lg shadow-blue-200 transition hover:-translate-y-0.5 hover:shadow-blue-300"
           >
             Mulai Rekomendasi
@@ -122,7 +122,7 @@
           Isi onboarding singkat, dan Brainpath akan merekomendasikan video & kursus IT yang paling cocok untukmu.
         </p>
         <RouterLink
-          to="/login"
+          to="/register"
           class="mt-8 inline-flex h-11 items-center justify-center rounded-xl bg-white/90 px-8 text-sm font-black text-slate-950 shadow-sm transition hover:bg-white"
         >
           Mulai Rekomendasi

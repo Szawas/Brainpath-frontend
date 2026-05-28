@@ -15,11 +15,15 @@
         </div>
 
         <div class="grid gap-4">
+          <div v-if="resourceStore.loading" class="flex justify-center py-10">
+            <p class="text-slate-500 font-medium">Memuat riwayat...</p>
+          </div>
           <BaseCard
+            v-else
             v-for="item in historyItems"
             :key="item.id"
             padding="md"
-            class="rounded-2xl"
+            class="rounded-2xl mb-4"
           >
             <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div class="flex items-start gap-4">
@@ -34,7 +38,7 @@
                       {{ item.category }}
                     </span>
                     <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
-                      {{ item.openedAt }}
+                      Skor kuis: {{ item.progress?.score || 0 }}%
                     </span>
                   </div>
                 </div>
@@ -56,13 +60,19 @@
 </template>
 
 <script setup>
+import { computed, onMounted } from 'vue'
 import AppSidebar from '@/components/layout/AppSidebar.vue'
 import BaseCard from '@/components/common/BaseCard.vue'
-import { resources } from '@/data/resources'
+import { useResourceStore } from '@/stores/resourceStore'
 import { Eye, Play } from 'lucide-vue-next'
 
-const historyItems = resources.slice(0, 3).map((resource, index) => ({
-  ...resource,
-  openedAt: ['Dibuka hari ini', 'Dibuka kemarin', 'Dibuka 3 hari lalu'][index],
-}))
+const resourceStore = useResourceStore()
+
+const historyItems = computed(() => {
+  return resourceStore.history || []
+})
+
+onMounted(() => {
+  resourceStore.fetchHistory()
+})
 </script>

@@ -49,7 +49,11 @@
         Logout
       </button>
 
-      <div v-if="helperTitle || helperText" class="rounded-2xl bg-blue-50 px-3 py-2.5">
+      <RouterLink 
+        v-if="helperTitle || helperText" 
+        to="/chatbot"
+        class="block rounded-2xl bg-blue-50 px-3 py-2.5 transition hover:bg-blue-100"
+      >
         <div class="flex items-center gap-2">
           <component :is="icons.chat" class="h-4 w-4 text-blue-700" />
           <p class="text-xs font-extrabold text-blue-700">{{ helperTitle }}</p>
@@ -57,23 +61,24 @@
         <p class="mt-1 text-[11px] leading-4 text-slate-500">
           {{ helperText }}
         </p>
-      </div>
+      </RouterLink>
     </div>
   </aside>
 </template>
 
 <script setup>
-import { h } from 'vue'
+import { h, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getCurrentUser, logoutUser } from '@/lib/auth'
+import { useAuthStore } from '@/stores/authStore'
 
 const route = useRoute()
 const router = useRouter()
-const currentUser = getCurrentUser()
-const canAccessAdmin = currentUser?.role === 'admin'
+const authStore = useAuthStore()
 
-const handleLogout = () => {
-  logoutUser()
+const canAccessAdmin = computed(() => authStore.isAdmin)
+
+const handleLogout = async () => {
+  await authStore.logout()
   router.push('/')
 }
 

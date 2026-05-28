@@ -101,9 +101,13 @@
             </div>
           </div>
 
-          <BaseButton type="submit" full-width size="lg">
-            Lihat Rekomendasi
+          <BaseButton type="submit" full-width size="lg" :disabled="onboardingStore.loading">
+            {{ onboardingStore.loading ? 'Menyimpan...' : 'Lihat Rekomendasi' }}
           </BaseButton>
+
+          <div v-if="onboardingStore.error" class="text-sm font-medium text-red-500 text-center">
+            {{ onboardingStore.error }}
+          </div>
         </form>
       </BaseCard>
     </section>
@@ -118,8 +122,10 @@ import BaseCard from '@/components/common/BaseCard.vue'
 import IconBox from '@/components/common/IconBox.vue'
 import StepProgress from '@/components/common/StepProgress.vue'
 import { BarChart3, Bot, Monitor, Palette, Puzzle } from 'lucide-vue-next'
+import { useOnboardingStore } from '@/stores/onboardingStore'
 
 const router = useRouter()
+const onboardingStore = useOnboardingStore()
 const steps = ['Pemahaman IT', 'Reframing', 'Minat', 'Rekomendasi']
 
 const questions = [
@@ -178,7 +184,18 @@ const learningNote = ref('')
 
 const answeredCount = computed(() => Object.keys(answers.value).length)
 
-const goToRecommendation = () => {
-  router.push('/recommendation')
+const goToRecommendation = async () => {
+  // Extract unique interests from answers
+  const selectedInterests = Array.from(new Set(Object.values(answers.value)))
+  
+  onboardingStore.setInterests(selectedInterests)
+  onboardingStore.setGoalAndNote(learningGoal.value, learningNote.value)
+  
+  try {
+    await onboardingStore.completeOnboarding()
+    router.push('/recommendation')
+  } catch (error) {
+    console.error('Failed to complete onboarding:', error)
+  }
 }
 </script>

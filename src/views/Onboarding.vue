@@ -21,21 +21,21 @@
         </p>
 
         <div class="mt-9 grid gap-5 md:grid-cols-2">
-          <RouterLink to="/interest-form" class="block">
+          <button @click="selectKnowledge(true)" class="block text-left w-full">
             <KnowledgeOptionCard
               :icon="CheckCircle"
               title="Sudah Paham"
               description="Saya sudah familiar dengan dunia IT dan ingin langsung memilih minat."
             />
-          </RouterLink>
+          </button>
 
-          <RouterLink to="/reframing" class="block">
+          <button @click="selectKnowledge(false)" class="block text-left w-full">
             <KnowledgeOptionCard
               :icon="HelpCircle"
               title="Belum Paham"
               description="Saya ingin melihat gambaran singkat bidang-bidang IT terlebih dahulu."
             />
-          </RouterLink>
+          </button>
         </div>
       </BaseCard>
     </section>
@@ -43,10 +43,23 @@
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router'
 import BaseCard from '@/components/common/BaseCard.vue'
 import StepProgress from '@/components/common/StepProgress.vue'
 import KnowledgeOptionCard from '@/components/onboarding/KnowledgeOptionCard.vue'
 import { CheckCircle, HelpCircle } from 'lucide-vue-next'
+import { useOnboardingStore } from '@/stores/onboardingStore'
 
+const router = useRouter()
+const onboardingStore = useOnboardingStore()
 const steps = ['Pemahaman IT', 'Reframing', 'Minat', 'Rekomendasi']
+
+const selectKnowledge = (hasKnowledge) => {
+  onboardingStore.setKnowledge(hasKnowledge)
+  if (hasKnowledge) {
+    router.push('/interest-form')
+  } else {
+    router.push('/reframing')
+  }
+}
 </script>
