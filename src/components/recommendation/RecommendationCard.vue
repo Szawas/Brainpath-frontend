@@ -46,7 +46,7 @@
       </div>
 
       <div class="flex flex-col gap-3 sm:flex-row">
-        <BaseButton :to="`/resources/${resource.id}`" variant="secondary" full-width>
+        <BaseButton v-if="showPreview" :to="`/resources/${resource.id}`" variant="secondary" full-width>
           <Eye class="h-4 w-4" />
           Preview Materi
         </BaseButton>
@@ -68,6 +68,10 @@ defineProps({
   resource: {
     type: Object,
     required: true,
+  },
+  showPreview: {
+    type: Boolean,
+    default: true,
   },
 })
 </script>

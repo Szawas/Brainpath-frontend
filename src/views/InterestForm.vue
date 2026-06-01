@@ -123,9 +123,11 @@ import IconBox from '@/components/common/IconBox.vue'
 import StepProgress from '@/components/common/StepProgress.vue'
 import { BarChart3, Bot, Monitor, Palette, Puzzle } from 'lucide-vue-next'
 import { useOnboardingStore } from '@/stores/onboardingStore'
+import { useAuthStore } from '@/stores/authStore'
 
 const router = useRouter()
 const onboardingStore = useOnboardingStore()
+const authStore = useAuthStore()
 const steps = ['Pemahaman IT', 'Reframing', 'Minat', 'Rekomendasi']
 
 const questions = [
@@ -192,7 +194,12 @@ const goToRecommendation = async () => {
   onboardingStore.setGoalAndNote(learningGoal.value, learningNote.value)
   
   try {
-    await onboardingStore.completeOnboarding()
+    if (authStore.isAuthenticated) {
+      await onboardingStore.completeOnboarding()
+    } else {
+      await onboardingStore.getGuestRecommendation()
+    }
+
     router.push('/recommendation')
   } catch (error) {
     console.error('Failed to complete onboarding:', error)

@@ -46,37 +46,21 @@ const routes = [
     path: '/onboarding',
     name: 'onboarding',
     component: Onboarding,
-    meta: {
-      requiresAuth: true,
-      role: 'user',
-    },
   },
   {
     path: '/reframing',
     name: 'reframing',
     component: Reframing,
-    meta: {
-      requiresAuth: true,
-      role: 'user',
-    },
   },
   {
     path: '/interest-form',
     name: 'interest-form',
     component: InterestForm,
-    meta: {
-      requiresAuth: true,
-      role: 'user',
-    },
   },
   {
     path: '/recommendation',
     name: 'recommendation',
     component: Recommendation,
-    meta: {
-      requiresAuth: true,
-      role: 'user',
-    },
   },
   {
     path: '/resources/:id',

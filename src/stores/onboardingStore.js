@@ -2,12 +2,15 @@ import { defineStore } from 'pinia';
 import api from '@/lib/api';
 import { useAuthStore } from './authStore';
 
+const GUEST_RECOMMENDATION_KEY = 'guest_recommendation';
+
 export const useOnboardingStore = defineStore('onboarding', {
   state: () => ({
     hasItKnowledge: null,
     interests: [],
     learningGoal: '',
     note: '',
+    guestRecommendation: loadGuestRecommendation(),
     loading: false,
     error: null,
   }),
@@ -25,17 +28,21 @@ export const useOnboardingStore = defineStore('onboarding', {
       this.learningGoal = goal;
       this.note = note;
     },
+
+    buildOnboardingPayload() {
+      return {
+        has_it_knowledge: this.hasItKnowledge,
+        interest: this.interests.join(', '),
+        learning_goal: this.learningGoal,
+        note: this.note,
+      };
+    },
     
     async completeOnboarding() {
       this.loading = true;
       this.error = null;
       try {
-        const payload = {
-          has_it_knowledge: this.hasItKnowledge,
-          interest: this.interests.join(', '), // Ubah array menjadi string, dan gunakan key `interest`
-          learning_goal: this.learningGoal,
-          note: this.note,
-        };
+        const payload = this.buildOnboardingPayload();
         
         await api.post('/onboarding/complete', payload);
         
@@ -50,6 +57,40 @@ export const useOnboardingStore = defineStore('onboarding', {
       } finally {
         this.loading = false;
       }
+    },
+
+    async getGuestRecommendation() {
+      this.loading = true;
+      this.error = null;
+      try {
+        const payload = this.buildOnboardingPayload();
+        const response = await api.post('/guest/recommendations', payload);
+        const result = response.data?.data || null;
+
+        this.guestRecommendation = result;
+        localStorage.setItem(GUEST_RECOMMENDATION_KEY, JSON.stringify(result));
+
+        return result;
+      } catch (err) {
+        this.error = err.response?.data?.message || 'Gagal memuat rekomendasi guest';
+        throw err;
+      } finally {
+        this.loading = false;
+      }
+    },
+
+    hydrateGuestRecommendation() {
+      this.guestRecommendation = loadGuestRecommendation();
+      return this.guestRecommendation;
     }
   }
 });
+
+function loadGuestRecommendation() {
+  try {
+    return JSON.parse(localStorage.getItem(GUEST_RECOMMENDATION_KEY)) || null;
+  } catch {
+    localStorage.removeItem(GUEST_RECOMMENDATION_KEY);
+    return null;
+  }
+}
