@@ -136,6 +136,10 @@ const activeCategory = ref('Semua')
 const sortBy = ref('relevance')
 
 const guestResources = computed(() => mapRecommendationPayload(onboardingStore.guestRecommendation))
+const hasGuestRecommendationData = computed(() => {
+  const result = onboardingStore.guestRecommendation
+  return !!result && Array.isArray(result.recommendations)
+})
 
 const currentResources = computed(() => {
   if (authStore.isAuthenticated) {
@@ -158,7 +162,11 @@ const emptyStateDescription = computed(() => {
     return 'Kamu belum mengatur minat atau mengisi form onboarding. Yuk, mulai isi minat belajarmu sekarang!'
   }
 
-  return 'Isi form minat terlebih dahulu agar Brainpath bisa membuat rekomendasi untukmu.'
+  if (!hasGuestRecommendationData.value) {
+    return 'Selesaikan form minat terlebih dahulu agar Brainpath bisa membuat rekomendasi untukmu.'
+  }
+
+  return 'Belum ada kursus yang cocok dengan minatmu saat ini. Coba ulangi form minat dengan pilihan yang berbeda.'
 })
 
 const emptyStateCtaTo = computed(() => {

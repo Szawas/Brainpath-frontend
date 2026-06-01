@@ -67,8 +67,13 @@ export const useOnboardingStore = defineStore('onboarding', {
         const response = await api.post('/guest/recommendations', payload);
         const result = response.data?.data || null;
 
-        this.guestRecommendation = result;
-        localStorage.setItem(GUEST_RECOMMENDATION_KEY, JSON.stringify(result));
+        if (isValidGuestRecommendationResult(result)) {
+          this.guestRecommendation = result;
+          localStorage.setItem(GUEST_RECOMMENDATION_KEY, JSON.stringify(result));
+        } else {
+          this.guestRecommendation = null;
+          localStorage.removeItem(GUEST_RECOMMENDATION_KEY);
+        }
 
         return result;
       } catch (err) {
@@ -88,9 +93,19 @@ export const useOnboardingStore = defineStore('onboarding', {
 
 function loadGuestRecommendation() {
   try {
-    return JSON.parse(localStorage.getItem(GUEST_RECOMMENDATION_KEY)) || null;
+    const result = JSON.parse(localStorage.getItem(GUEST_RECOMMENDATION_KEY));
+    if (isValidGuestRecommendationResult(result)) {
+      return result;
+    }
+
+    localStorage.removeItem(GUEST_RECOMMENDATION_KEY);
+    return null;
   } catch {
     localStorage.removeItem(GUEST_RECOMMENDATION_KEY);
     return null;
   }
+}
+
+function isValidGuestRecommendationResult(result) {
+  return !!result && Array.isArray(result.recommendations);
 }

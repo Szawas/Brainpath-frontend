@@ -101,9 +101,13 @@
             </div>
           </div>
 
-          <BaseButton type="submit" full-width size="lg" :disabled="onboardingStore.loading">
+          <BaseButton type="submit" full-width size="lg" :disabled="onboardingStore.loading || !isFormComplete">
             {{ onboardingStore.loading ? 'Menyimpan...' : 'Lihat Rekomendasi' }}
           </BaseButton>
+
+          <div v-if="!isFormComplete" class="text-sm font-medium text-slate-500 text-center">
+            Jawab semua pertanyaan minat sebelum melihat rekomendasi.
+          </div>
 
           <div v-if="onboardingStore.error" class="text-sm font-medium text-red-500 text-center">
             {{ onboardingStore.error }}
@@ -185,8 +189,11 @@ const learningGoal = ref(goals[0])
 const learningNote = ref('')
 
 const answeredCount = computed(() => Object.keys(answers.value).length)
+const isFormComplete = computed(() => answeredCount.value === questions.length)
 
 const goToRecommendation = async () => {
+  if (!isFormComplete.value) return
+
   // Extract unique interests from answers
   const selectedInterests = Array.from(new Set(Object.values(answers.value)))
   
