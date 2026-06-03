@@ -1,21 +1,31 @@
 <template>
-  <BaseCard :selected="highlight" :interactive="interactive" padding="lg" class="h-full min-h-[220px]">
+  <BaseCard :selected="highlight" :interactive="interactive" padding="lg" class="group h-full min-h-[160px] transition-all duration-500 hover:scale-105 hover:shadow-2xl cursor-default hover:border-blue-300 relative bg-white">
     <div class="flex h-full flex-col">
       <IconBox
         v-if="icon"
         :icon="icon"
         :color="iconColor"
         size="xl"
+        class="transition-transform duration-500 group-hover:scale-110 group-hover:shadow-md"
       />
 
       <div class="mt-5">
         <p v-if="eyebrow" class="text-sm font-black uppercase tracking-wide text-blue-600">
           {{ eyebrow }}
         </p>
-        <h3 class="text-xl font-black leading-7 text-slate-950">{{ title }}</h3>
-        <p v-if="description" class="mt-3 text-base font-medium leading-7 text-slate-500">
-          {{ description }}
-        </p>
+        <h3 class="text-xl font-black leading-7 text-slate-950 transition-colors duration-300 group-hover:text-blue-700">{{ title }}</h3>
+        
+        <div 
+          v-if="description" 
+          class="grid transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]"
+          :class="interactive ? 'grid-rows-[0fr] opacity-0 group-hover:grid-rows-[1fr] group-hover:opacity-100 group-hover:mt-3' : 'grid-rows-[1fr] opacity-100 mt-3'"
+        >
+          <div class="overflow-hidden">
+            <p class="text-sm font-medium leading-relaxed text-slate-500">
+              {{ description }}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
 

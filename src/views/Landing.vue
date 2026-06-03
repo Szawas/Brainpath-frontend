@@ -98,14 +98,30 @@
             </p>
             <div class="mt-5 grid gap-3">
               <div
-                v-for="point in aboutPoints"
-                :key="point"
-                class="flex items-center gap-3 rounded-2xl bg-white px-4 py-3 text-sm font-bold text-slate-700 shadow-sm"
+                v-for="(point, idx) in aboutPoints"
+                :key="idx"
+                class="rounded-2xl bg-white px-4 py-3 shadow-sm cursor-pointer transition-all duration-300 hover:bg-slate-50 border border-transparent hover:border-blue-100"
+                @click="point.isOpen = !point.isOpen"
               >
-                <span class="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-blue-100 text-xs font-black text-blue-700">
-                  ✓
-                </span>
-                {{ point }}
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-3 text-sm font-bold text-slate-700">
+                    <span class="grid h-7 w-7 shrink-0 place-items-center rounded-full text-xs font-black transition-colors duration-300" :class="point.isOpen ? 'bg-blue-600 text-white shadow-md' : 'bg-blue-100 text-blue-700'">
+                      ✓
+                    </span>
+                    {{ point.title }}
+                  </div>
+                  <ChevronDown class="h-4 w-4 transition-transform duration-300" :class="point.isOpen ? 'rotate-180 text-blue-600' : 'text-slate-400'" />
+                </div>
+                <div 
+                  class="grid transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
+                  :class="point.isOpen ? 'grid-rows-[1fr] opacity-100 mt-3' : 'grid-rows-[0fr] opacity-0 mt-0'"
+                >
+                  <div class="overflow-hidden">
+                    <p class="text-xs font-medium leading-relaxed text-slate-500 pl-10 pr-2 pb-1">
+                      {{ point.description }}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -137,9 +153,10 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import AppNavbar from '@/components/layout/AppNavbar.vue'
 import SummaryCard from '@/components/common/SummaryCard.vue'
-import { BookOpen, Brain, Target, Video } from 'lucide-vue-next'
+import { BookOpen, Brain, Target, Video, ChevronDown } from 'lucide-vue-next'
 
 const benefits = [
   'Resource gratis dari YouTube',
@@ -147,12 +164,12 @@ const benefits = [
   'Cocok untuk pemula',
 ]
 
-const aboutPoints = [
-  'Untuk pemula IT',
-  'Rekomendasi berbasis minat',
-  'Resource eksternal terpercaya',
-  'Ringkasan materi dengan AI',
-]
+const aboutPoints = ref([
+  { title: 'Untuk pemula IT', description: 'Brainpath dirancang khusus dengan bahasa yang mudah dipahami bagi kamu yang baru memulai karir di bidang IT.', isOpen: false },
+  { title: 'Rekomendasi berbasis minat', description: 'Sistem menganalisis hasil kuesioner onboarding untuk menemukan kecocokan resource belajar yang paling relevan dengan minat kamu.', isOpen: false },
+  { title: 'Resource eksternal terpercaya', description: 'Video dan materi yang kami rekomendasikan berasal dari platform terpercaya seperti YouTube, freeCodeCamp, dan kreator IT terbaik lainnya.', isOpen: false },
+  { title: 'Ringkasan materi dengan AI', description: 'Setiap rekomendasi dilengkapi dengan poin ringkasan otomatis untuk memberikan gambaran cepat tentang apa yang akan dipelajari sebelum kamu mulai menonton.', isOpen: false },
+])
 
 const landingNavItems = [
   { label: 'Beranda', to: { path: '/', hash: '#home' } },
