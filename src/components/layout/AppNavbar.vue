@@ -2,7 +2,7 @@
   <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur">
     <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-5 lg:px-6">
       <RouterLink :to="brandTo" class="flex items-center gap-2.5">
-        <img src="/logo.jpg" alt="Brainpath Logo" class="h-9 w-9 rounded-xl object-cover shadow-sm" />
+        <img src="/Logo_BrainPath.png" alt="Brainpath Logo" class="h-9 w-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 p-1.5 object-contain shadow-sm" />
         <span class="text-lg font-black tracking-tight text-slate-950">{{ brand }}</span>
       </RouterLink>
 

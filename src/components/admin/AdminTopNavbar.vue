@@ -3,7 +3,7 @@
     <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 lg:px-8">
       <div class="flex items-center gap-8">
         <RouterLink to="/admin/resources" class="flex items-center gap-2.5" @click="isDrawerOpen = false">
-          <img src="/logo.jpg" alt="Brainpath Logo" class="h-9 w-9 rounded-xl object-cover shadow-sm" />
+          <img src="/Logo_BrainPath.png" alt="Brainpath Logo" class="h-9 w-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 p-1.5 object-contain shadow-sm" />
           <span class="text-lg font-extrabold tracking-tight text-slate-950">Brainpath</span>
         </RouterLink>
 
@@ -182,7 +182,7 @@
             <!-- Independent Drawer Header with Logo and Close button -->
             <div class="flex items-center justify-between border-b border-slate-100 pb-4">
               <div class="flex items-center gap-2.5">
-                <img src="/logo.jpg" alt="Brainpath Logo" class="h-8 w-8 rounded-xl object-cover shadow-sm" />
+                <img src="/Logo_BrainPath.png" alt="Brainpath Logo" class="h-8 w-8 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 p-1.5 object-contain shadow-sm" />
                 <span class="text-base font-extrabold tracking-tight text-slate-950">Brainpath</span>
               </div>
               <button
