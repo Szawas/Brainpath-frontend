@@ -11,7 +11,6 @@ import Recommendation from '@/views/Recommendation.vue'
 import ResourcePreview from '@/views/ResourcePreview.vue'
 import Profile from '@/views/Profile.vue'
 import History from '@/views/History.vue'
-import Chatbot from '@/views/Chatbot.vue'
 import AdminResources from '@/views/AdminResources.vue'
 import AdminAnalytics from '@/views/AdminAnalytics.vue'
 import AdminSettings from '@/views/AdminSettings.vue'
@@ -100,15 +99,6 @@ const routes = [
     path: '/history',
     name: 'history',
     component: History,
-    meta: {
-      requiresAuth: true,
-      role: 'user',
-    },
-  },
-  {
-    path: '/chatbot',
-    name: 'chatbot',
-    component: Chatbot,
     meta: {
       requiresAuth: true,
       role: 'user',

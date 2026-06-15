@@ -130,11 +130,11 @@
             Logout
           </button>
 
-          <RouterLink 
+          <button 
             v-if="helperTitle || helperText" 
-            to="/chatbot"
-            class="block rounded-2xl bg-blue-50 px-4 py-3 transition hover:bg-blue-100"
-            @click="isOpen = false"
+            type="button"
+            class="block w-full text-left rounded-2xl bg-blue-50 px-4 py-3 transition hover:bg-blue-100"
+            @click="handleChatToggleMobile"
           >
             <div class="flex items-center gap-2">
               <component :is="icons.chat" class="h-4.5 w-4.5 text-blue-700" />
@@ -143,7 +143,7 @@
             <p class="mt-1 text-[11px] leading-4 text-slate-500 font-medium">
               {{ helperText }}
             </p>
-          </RouterLink>
+          </button>
         </div>
       </aside>
     </Transition>
@@ -195,10 +195,11 @@
         Logout
       </button>
 
-      <RouterLink 
+      <button 
         v-if="helperTitle || helperText" 
-        to="/chatbot"
-        class="block rounded-2xl bg-blue-50 px-3 py-2.5 transition hover:bg-blue-100"
+        type="button"
+        class="block w-full text-left rounded-2xl bg-blue-50 px-3 py-2.5 transition hover:bg-blue-100"
+        @click="chatbotStore.toggleChat"
       >
         <div class="flex items-center gap-2">
           <component :is="icons.chat" class="h-4 w-4 text-blue-700" />
@@ -207,7 +208,7 @@
         <p class="mt-1 text-[11px] leading-4 text-slate-500">
           {{ helperText }}
         </p>
-      </RouterLink>
+      </button>
     </div>
   </aside>
 </template>
@@ -216,11 +217,13 @@
 import { h, computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
+import { useChatbotStore } from '@/stores/chatbotStore'
 import { Menu, X, ChevronRight } from 'lucide-vue-next'
 
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
+const chatbotStore = useChatbotStore()
 
 const canAccessAdmin = computed(() => authStore.isAdmin)
 
@@ -232,6 +235,11 @@ const handleLogout = async () => {
 const handleLogoutMobile = async () => {
   isOpen.value = false
   await handleLogout()
+}
+
+const handleChatToggleMobile = () => {
+  isOpen.value = false
+  chatbotStore.toggleChat()
 }
 
 const isOpen = ref(false)

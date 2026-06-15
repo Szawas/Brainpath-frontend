@@ -6,6 +6,11 @@ export const useChatbotStore = defineStore('chatbot', () => {
   const messages = ref([])
   const isLoading = ref(false)
   const error = ref(null)
+  const isChatOpen = ref(false)
+
+  const toggleChat = () => {
+    isChatOpen.value = !isChatOpen.value
+  }
 
   const sendMessage = async (question, courseId) => {
     if (!question.trim() || !courseId) return
@@ -43,7 +48,9 @@ export const useChatbotStore = defineStore('chatbot', () => {
     messages,
     isLoading,
     error,
+    isChatOpen,
     sendMessage,
-    clearChat
+    clearChat,
+    toggleChat
   }
 })

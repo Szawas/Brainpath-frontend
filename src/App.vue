@@ -4,7 +4,15 @@
       <component :is="Component" />
     </transition>
   </RouterView>
+  <FloatingChat v-if="authStore.isAuthenticated" />
 </template>
+
+<script setup>
+import { useAuthStore } from '@/stores/authStore'
+import FloatingChat from '@/components/chat/FloatingChat.vue'
+
+const authStore = useAuthStore()
+</script>
 
 <style>
 /* Global Page Transitions */
